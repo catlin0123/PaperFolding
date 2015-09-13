@@ -33,7 +33,7 @@ Complex Complex::Divide(Complex rhs)
 {
     double denominator = rhs.X * rhs.X + rhs.Y * rhs.Y;
     double newX = (X * rhs.X + Y * rhs.Y) / denominator;
-    double newY = (Y * rhs.X + X * rhs.Y) / denominator; 
+    double newY = (Y * rhs.X - X * rhs.Y) / denominator; 
     return Complex(newX, newY); 
 }
 
@@ -75,11 +75,6 @@ Complex Complex::operator*(const Complex& complex)
 Complex Complex::operator/(const Complex& complex)
 {
     return Divide(complex); 
-}
-
-Complex& Complex::operator=(const double& x)
-{
-    return Complex(x, 0); 
 }
 
 double Complex::Re()

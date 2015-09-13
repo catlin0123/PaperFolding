@@ -1,11 +1,12 @@
 #include <gl/freeglut.h>
 #include <gl/GLU.h>
-#include <vector>
-#include <string>
-#include  "Complex.h"
+#include <list>
+#include <fstream> 
+#include "Complex.h"
+#include "FootedVector.h"
+#pragma once; 
 
 using namespace std; 
-
 
 int main(int argc, char *argv[]);
 void Display();
@@ -13,10 +14,13 @@ void Reshape(int width, int height);
 void Keyboard(unsigned char key, int x, int y);
 void Menu(int value);
 void CreateClickMenu();
-void DrawLine(int x1, int y1, int x2, int y2, bool isDotted, double color[]);
+void DrawLine(FootedVector vector, bool isDotted, const double color[]);
+FootedVector FindNewVector(FootedVector vector); 
+void GetData(int argc, char *argv[]);
+void GetFileContents(ifstream& stream);
 
-const int INIT_SCREEN_WIDTH = 400;
-const int INIT_SCREEN_HEIGHT = 300; 
+const int INIT_SCREEN_WIDTH = 500;
+const int INIT_SCREEN_HEIGHT = 500; 
 const int ESCAPE_KEY = 27; 
 
 int ScreenWidth; 
@@ -31,64 +35,16 @@ const double PURPLE[] = { 76.0/255, 0.0, 153.0/255 };
 const double WHITE[] = { 1.0, 1.0, 1.0 }; 
 const double BLACK[] = { 0.0, 0.0, 0.0 };
 
-int main(int argc, char *argv[])
-{
-    glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
-    glClearColor(WHITE[0], WHITE[1], WHITE[2], 1.0);
-    glutInitWindowSize(INIT_SCREEN_WIDTH, INIT_SCREEN_HEIGHT); 
-    glutInitWindowPosition(100, 100);
-    glutCreateWindow("Paper Folding");
+int main(int argc, char *argv[]);
 
-    glutDisplayFunc(Display);
-    glutReshapeFunc(Reshape);
-    glutKeyboardFunc(Keyboard);
-    CreateClickMenu(); 
+void Display();
 
-    glutMainLoop(); 
-}
+void Reshape(int width, int height);
 
-void Display()
-{
-    glClear(GL_COLOR_BUFFER_BIT );
-    
-    //Draw my lines and whatnot
+void Keyboard(unsigned char key, int x, int y);
 
-    glutSwapBuffers(); 
-}
+void Menu(int value);
 
-void Reshape(int width, int height)
-{
-    ScreenWidth = width; 
-    ScreenHeight = height; 
-}
+void CreateClickMenu();
 
-void Keyboard(unsigned char key, int x, int y)
-{
-    switch (key)
-    {
-        case ESCAPE_KEY:
-            glutLeaveMainLoop(); 
-    }
-}
-
-void Menu(int value)
-{
-    switch (value)
-    {
-        case -1:
-            //This is how you would get something to happen when "Not actual menu entry" was pressed
-    }
-}
-
-void CreateClickMenu()
-{
-    glutCreateMenu(Menu);
-    glutAddMenuEntry("Not actual menu entry", -1); 
-    glutAttachMenu(GLUT_RIGHT_BUTTON); 
-}
-
-void DrawLine(int x1, int y1, int x2, int y2, bool isDotted, double color[])
-{
-
-}
+void DrawLine(int x1, int y1, int x2, int y2, bool isDotted, double color[]);

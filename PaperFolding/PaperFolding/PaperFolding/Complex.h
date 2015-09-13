@@ -12,12 +12,10 @@ public:
     Complex Subtract(Complex rhs);
     Complex operator-(); 
     Complex operator!();
-    Complex& operator=(const double& x); 
     Complex operator-(const Complex& complex);
     Complex operator+(const Complex& complex); 
     Complex operator*(const Complex& complex); 
     Complex operator/(const Complex& complex);
-    Complex operator=(const Complex& complex);
     double Re();
     double Im();
     
