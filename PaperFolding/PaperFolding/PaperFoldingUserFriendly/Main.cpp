@@ -5,6 +5,14 @@ using namespace std;
  
 list<FootedVector> Folds = list<FootedVector>(); 
 list<FootedVector> Cuts = list<FootedVector>(); 
+FootedVector newFoldOrCut = FootedVector(); 
+bool takingFolds = true;
+bool takingCuts = false; 
+
+double MinX = 0; 
+double MinY = 0;
+double MaxX = 500; 
+double MaxY = 500; 
 
 int main(int argc, char *argv[])
 {
@@ -18,103 +26,93 @@ int main(int argc, char *argv[])
     glutDisplayFunc(Display);
     glutReshapeFunc(Reshape);
     glutKeyboardFunc(Keyboard);
+    glutMouseFunc(Mouse); 
     CreateClickMenu();
-
-	glLineWidth(3);
-
-    //Open and get file data
-    GetData(argc, argv); 
 
     glutMainLoop();
     return 1; 
 }
 
-void GetData(int argc, char *argv[])
+void Mouse(int button, int state, int x, int y)
 {
-    string filename = ""; 
-    if (argc > 2)
+    if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
     {
-        cout << "Improper usage. Only one filename can be specified"; 
+        newFoldOrCut.Tail = Complex(x, MaxY - MinY - y); 
     }
-    else if (argc == 2)
+    else if (button == GLUT_LEFT_BUTTON && state == GLUT_UP)
     {
-        filename = argv[1]; 
-    }
-    else if (argc == 1)
-    {
-        filename = "Text.txt"; 
-    }
-
-    
-    if (filename != "")
-    {
-        fstream stream(filename);
-        if (stream.is_open())
+        newFoldOrCut.Head = Complex(x, MaxY - MinY - y);
+        if (takingFolds)
         {
-            GetFileContents(stream); 
+            Folds.push_back(newFoldOrCut);
         }
-        else
+        else if (takingCuts)
         {
-            cout << "Could not open the specified file"; 
+            Cuts.push_back(newFoldOrCut);
+            takingCuts = false; 
         }
+        newFoldOrCut = FootedVector(); 
     }
-}
-
-void GetFileContents(fstream &stream)
-{
-    double x1, x2, y1, y2; 
-    int numFolds, numCuts; 
-
-    stream >> numFolds >> numCuts; 
-    for (int i = 0; i < numFolds; i++)
-    {
-        stream >> x1 >> y1 >> x2 >> y2; 
-        Folds.push_front(FootedVector(Complex(x1, y1), Complex(x2, y2)));
-    }
-
-    for (int i = 0; i < numCuts; i++)
-    {
-        stream >> x1 >> y1 >> x2 >> y2;
-        Cuts.push_front(FootedVector(Complex(x1, y1), Complex(x2, y2)));
-    }
+    glutPostRedisplay();
 }
 
 void Display()
 {
+    double minx = 0; 
+    double miny = 0; 
+    double maxx = 0; 
+    double maxy = 0; 
     glClear(GL_COLOR_BUFFER_BIT);
     
     for (FootedVector vector : Folds)
     {
         DrawLine(vector, true, GREEN); 
+        FindMinAndMax(vector, minx, miny, maxx, maxy);
     }
 
     for (FootedVector vector : Cuts)
     {
         DrawLine(vector, false, BLUE); 
+        FindMinAndMax(vector, minx, miny, maxx, maxy);
     }
 
     if (Folds.size() > 0)
     {
         DrawLine(Folds.back(), true, RED); 
     }
-    
 
+    if (minx < MinX)
+    {
+        MinX = minx; 
+        glutReshapeWindow(MaxX - MinX, MaxY - MinY); 
+    }
+    if (miny < MinY)
+    {
+        MinY = miny; 
+        glutReshapeWindow(MaxX - MinX, MaxY - MinY);
+    }
+    if (maxx > MaxX)
+    {
+        MaxX = maxx;
+        glutReshapeWindow(MaxX - MinX, MaxY - MinY);
+    }
+    if (maxy > MaxY)
+    {
+        MaxY = maxy; 
+        glutReshapeWindow(MaxX - MinX, MaxY - MinY);
+    }
     glutSwapBuffers();
 }
 
 void Reshape(int width, int height)
 {
-    ScreenWidth = width;
-    ScreenHeight = height;
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity(); 
-    gluOrtho2D(-10, 10, -10, 10); 
+    gluOrtho2D(MinX, MaxX, MinY, MaxY); 
 
-    if (float(width) / height > 1)
-        glViewport((width - height) / 2, 0, height, height);
-    else
-        glViewport(0, (height - width) / 2, width, width);
+    glViewport(MinX, MinY, width, height);
+
 }
 
 void Keyboard(unsigned char key, int x, int y)
@@ -125,6 +123,13 @@ void Keyboard(unsigned char key, int x, int y)
 
     switch (key)
     {
+    case 13: 
+        if (takingFolds)
+        {
+            takingFolds = false; 
+            takingCuts = true; 
+        }
+        break;
     case 'N':
     case 'n':
         if (Folds.size() > 0)
@@ -184,7 +189,11 @@ void Menu(int value)
 {
     switch (value)
     {
-        case -1:
+        case 1:
+            if (!takingFolds && !takingCuts)
+            {
+                Keyboard('N', 0, 0); 
+            }
             break; 
     }
 }
@@ -192,7 +201,7 @@ void Menu(int value)
 void CreateClickMenu()
 {
     glutCreateMenu(Menu);
-    glutAddMenuEntry("Not actual menu entry", -1);
+    glutAddMenuEntry("Unfold next line - n", 1);
     glutAttachMenu(GLUT_RIGHT_BUTTON);
 }
 
@@ -219,19 +228,49 @@ void DrawLine(FootedVector vector, bool isDotted, const double color[])
 
 FootedVector FindNewVector(FootedVector vector)
 {
-	FootedVector newVector = FootedVector();
-	if (vector.Head.X - vector.Tail.X != 0)
-	{
-		double slope = (vector.Head.Y - vector.Tail.Y) / (vector.Head.X - vector.Tail.X);
-		double intercept = vector.Tail.Y - slope * vector.Tail.X;
-		double yint = -intercept / slope;
+    double slope = (vector.Head.Y - vector.Tail.Y) / (vector.Head.X - vector.Tail.X); 
+    double intercept = vector.Tail.Y - slope * vector.Tail.X; 
+    double yint = -intercept / slope; 
 
-		newVector.Head = Complex(yint, 0);		
-	}
-	else
-	{
-		newVector.Head = Complex(vector.Head.X, 0);
-	}
-	newVector.Tail = vector.Head.Y < 0 ? vector.Head : vector.Tail;
-	return newVector;
+    FootedVector newVector = FootedVector(); 
+    newVector.Head = Complex(yint, 0); 
+    newVector.Tail = vector.Head.Y < 0 ? vector.Head : vector.Tail;
+    return newVector; 
+}
+
+void FindMinAndMax(FootedVector v, double & minx, double & miny, double & maxx, double & maxy)
+{
+    if (v.Head.X < minx)
+    {
+        minx = v.Head.X;
+    }
+    if (v.Head.X > maxx)
+    {
+        maxx = v.Head.X;
+    }
+    if (v.Tail.X < minx)
+    {
+        minx = v.Tail.X;
+    }
+    if (v.Tail.X > maxx)
+    {
+        maxx = v.Tail.X;
+    }
+
+    if (v.Head.Y < miny)
+    {
+        miny = v.Head.Y;
+    }
+    if (v.Head.Y > maxy)
+    {
+        maxy = v.Head.Y;
+    }
+    if (v.Tail.Y < miny)
+    {
+        miny = v.Tail.Y;
+    }
+    if (v.Tail.Y > maxy)
+    {
+        maxy = v.Tail.Y;
+    }
 }

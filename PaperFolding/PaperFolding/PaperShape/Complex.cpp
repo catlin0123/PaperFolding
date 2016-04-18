@@ -77,20 +77,6 @@ Complex Complex::operator/(const Complex& complex)
     return Divide(complex); 
 }
 
-bool Complex::operator==(const Complex& complex)
-{
-    if (abs(X - complex.X) < 0.0001 && abs(Y - complex.Y))
-    {
-        return true; 
-    }
-    return false; 
-}
-
-bool Complex::operator!=(const Complex& complex)
-{
-    return !(*this == complex);
-}
-
 double Complex::Re()
 {
     return X; 

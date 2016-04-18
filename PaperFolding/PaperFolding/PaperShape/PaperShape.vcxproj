@@ -11,9 +11,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{9BBA4341-F5E9-4B6B-8231-DDDFE3372A5A}</ProjectGuid>
+    <ProjectGuid>{A4F32AA2-E6A3-478E-BCE9-4C2035C6388E}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>PaperFolding</RootNamespace>
+    <RootNamespace>PaperShape</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -76,17 +76,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Complex.cpp" />
-    <ClCompile Include="FootedVector.cpp" />
+    <ClInclude Include="..\PaperFolding\Complex.h" />
+    <ClInclude Include="..\PaperFolding\FootedVector.h" />
+    <ClInclude Include="Main.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\PaperFolding\Complex.cpp" />
+    <ClCompile Include="..\PaperFolding\FootedVector.cpp" />
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Text.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="Complex.h" />
-    <ClInclude Include="FootedVector.h" />
-    <ClInclude Include="Main.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

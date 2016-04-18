@@ -16,8 +16,6 @@ public:
     Complex operator+(const Complex& complex); 
     Complex operator*(const Complex& complex); 
     Complex operator/(const Complex& complex);
-    bool operator==(const Complex& complex); 
-    bool operator!=(const Complex& complex);
     double Re();
     double Im();
     

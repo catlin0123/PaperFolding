@@ -19,6 +19,7 @@ FootedVector FindNewVector(FootedVector vector);
 void GetData(int argc, char *argv[]);
 void GetFileContents(fstream& stream);
 bool IsClockWise(list<Complex> pointList);
+list<Complex> FindNewPoints(list<Complex> first, list<Complex> second);
 
 const int INIT_SCREEN_WIDTH = 500;
 const int INIT_SCREEN_HEIGHT = 500; 
